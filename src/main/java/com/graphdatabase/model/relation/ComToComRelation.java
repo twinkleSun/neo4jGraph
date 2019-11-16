@@ -33,6 +33,9 @@ public class ComToComRelation {
     @Property(name = "transSum")
     private Double transSum;
 
+    @Property(name = "timeRange")
+    private String timeRange;
+
     //关系链起始节点
     @StartNode
     private CompanyNode startNode;
@@ -40,4 +43,6 @@ public class ComToComRelation {
     //关系链终止节点
     @EndNode
     private CompanyNode endNode;
+
+
 }

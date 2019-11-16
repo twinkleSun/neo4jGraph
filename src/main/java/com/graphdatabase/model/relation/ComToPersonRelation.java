@@ -22,6 +22,9 @@ public class ComToPersonRelation {
     @Property(name = "transMoney")
     private Double transMoney;
 
+    @Property(name = "timeRange")
+    private String timeRange;
+
     //交易笔数
     @Property(name = "transNum")
     private int transNum;
