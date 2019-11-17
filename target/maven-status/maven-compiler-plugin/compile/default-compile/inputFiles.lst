@@ -1,13 +1,15 @@
-E:\1_git\neo4jGraph\src\main\java\com\graphdatabase\model\entity\EndCompany.java
 E:\1_git\neo4jGraph\src\main\java\com\graphdatabase\model\relation\ComToPersonRelation.java
 E:\1_git\neo4jGraph\src\main\java\com\graphdatabase\GraphApplication.java
 E:\1_git\neo4jGraph\src\main\java\com\graphdatabase\model\node\CompanyNode.java
 E:\1_git\neo4jGraph\src\main\java\com\graphdatabase\dao\CompanyMapper.java
 E:\1_git\neo4jGraph\src\main\java\com\graphdatabase\controller\CompanyController.java
 E:\1_git\neo4jGraph\src\main\java\com\graphdatabase\model\node\PersonNode.java
+E:\1_git\neo4jGraph\src\main\java\com\graphdatabase\model\entity\ComToComEntity.java
 E:\1_git\neo4jGraph\src\main\java\com\graphdatabase\model\relation\ComToLegPersonRelation.java
 E:\1_git\neo4jGraph\src\main\java\com\graphdatabase\model\node\LegalPersonNode.java
 E:\1_git\neo4jGraph\src\main\java\com\graphdatabase\service\CompanyService.java
 E:\1_git\neo4jGraph\src\main\java\com\graphdatabase\util\DataTransferUtil.java
+E:\1_git\neo4jGraph\src\main\java\com\graphdatabase\model\entity\NodeAndRelationEntity.java
+E:\1_git\neo4jGraph\src\main\java\com\graphdatabase\model\entity\ResponseEntity.java
+E:\1_git\neo4jGraph\src\main\java\com\graphdatabase\model\entity\FilterParameter.java
 E:\1_git\neo4jGraph\src\main\java\com\graphdatabase\model\relation\ComToComRelation.java
-E:\1_git\neo4jGraph\src\main\java\com\graphdatabase\model\entity\StartCompany.java

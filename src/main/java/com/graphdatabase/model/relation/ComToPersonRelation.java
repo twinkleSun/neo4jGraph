@@ -37,11 +37,18 @@ public class ComToPersonRelation {
     @Property(name = "transSum")
     private Double transSum;
 
-    //关系链起始节点
-    @StartNode
-    private CompanyNode startNode;
+    @Property(name = "startName")
+    private String startName;
 
-    //关系链终止节点
-    @EndNode
-    private PersonNode endNode;
+    @Property(name = "endName")
+    private String endName;
+
+
+//    //关系链起始节点
+//    @StartNode
+//    private CompanyNode startNode;
+//
+//    //关系链终止节点
+//    @EndNode
+//    private PersonNode endNode;
 }

@@ -12,14 +12,14 @@ public class FilterParameter {
      * 0=不成圈（默认）
      * 1=成圈
      */
-    private String isCircle = "0";
+    private int isCircle;
 
     /**
      * 探索方向,默认为2，双向
      * 0=反向，1=正向，2=双向
      * 全不选也为双向
      */
-    private String isForward = "0";
+    private int isForward;
 
     /**
      * 时间范围，默认为当月时间
@@ -30,22 +30,23 @@ public class FilterParameter {
      * 交易类别
      * 全部，本行-本行，本行-他行
      */
-    private String transCategory;
+    private int transCategory;
 
     /**
      * 交易金额 transMoney，默认1000万
      * 交易笔数 transNum，默认0不筛选
      * 交易笔均 transAvg,默认0为不筛选
      */
-    private String transMoney;
+    private double transMoney;
 
-    private String transNum;
+    private double transNum;
 
-    private String transAvg;
+    private double transAvg;
 
     /**
      * 探索路径层数，默认为1
      * 取值范围1->10
+     * 如果不成圈，则形如..2;成圈则形如0..
      */
     private String searchLevel;
 
@@ -54,7 +55,7 @@ public class FilterParameter {
      * 1，不显示水电
      * 0，全部显示
      */
-    private String supplyNum;
+    private int supplyNum;
 
     /**
      * 探索路径选择

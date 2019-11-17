@@ -10,7 +10,7 @@ import org.neo4j.ogm.annotation.*;
  */
 @Setter
 @Getter
-@RelationshipEntity(type = "relation_mm")
+@RelationshipEntity(type = "relation_cc")
 public class ComToComRelation {
 
     @Id
@@ -33,16 +33,23 @@ public class ComToComRelation {
     @Property(name = "transSum")
     private Double transSum;
 
+    //交易录入的时间
     @Property(name = "timeRange")
     private String timeRange;
 
-    //关系链起始节点
-    @StartNode
-    private CompanyNode startNode;
+    @Property(name = "startName")
+    private String startName;
 
-    //关系链终止节点
-    @EndNode
-    private CompanyNode endNode;
+    @Property(name = "endName")
+    private String endName;
+
+//    //关系链起始节点
+//    @StartNode
+//    private CompanyNode startNode;
+//
+//    //关系链终止节点
+//    @EndNode
+//    private CompanyNode endNode;
 
 
 }

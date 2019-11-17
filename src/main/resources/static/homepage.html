@@ -5,8 +5,8 @@
     <title>资金链路</title>
     <link rel="stylesheet" href="plugins/bootstrap/css/bootstrap.css">
     <script src="plugins/jquery-2.1.4.min.js"></script>
-    <script src="plugins/bootstrap/js/bootstrap.min.js"/>
-    <script src="plugins/echarts/echarts.min.js"></script>
+    <!--<script src="plugins/bootstrap/js/bootstrap.min.js"/>-->
+    <script src="dist/echarts.min.js"></script>
     <script src="js/homepage.js"></script>
 </head>
 <body>
@@ -62,19 +62,19 @@
                             <div class="form-group">
                                 <label class="col-md-5 control-label">交易金额(万)>=：</label>
                                 <div class="col-md-6">
-                                    <input type="number" id="transMoney-input" class="form-control" placeholder="请输入交易金额" min="1000">
+                                    <input type="number" id="transMoney-input" class="form-control" placeholder="请输入交易金额" min="1000" onchange="checkMoney()">
                                 </div>
                             </div>
                             <div class="form-group">
                                 <label class="col-md-5 control-label">交易笔数>=：</label>
                                 <div class="col-md-6">
-                                    <input type="number" id="transNum-input" class="form-control" placeholder="请输入交易笔数" min="0">
+                                    <input type="number" id="transNum-input" class="form-control" placeholder="请输入交易笔数" min="0" oninput="checkNum()">
                                 </div>
                             </div>
                             <div class="form-group">
                                 <label class="col-md-5 control-label">交易笔均(万)>=：</label>
                                 <div class="col-md-6">
-                                    <input type="number" id="transAvg-input" class="form-control" placeholder="请输入交易笔均" min="0">
+                                    <input type="number" id="transAvg-input" class="form-control" placeholder="请输入交易笔均" min="0" oninput="checkAvg()">
                                 </div>
                             </div>
 

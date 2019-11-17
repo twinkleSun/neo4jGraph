@@ -2,7 +2,130 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.graphdatabase.dao.CompanyMapper">
 
+    <resultMap id="companyNode" type="com.graphdatabase.model.node.CompanyNode">
+        <id column="id" property="Id"/>
+        <result column="cname" property="cname"/>
+        <result column="openBranch" property="openBranch"/>
+        <result column="thirdBranch" property="thirdBranch"/>
+        <result column="secondBranch" property="secondBranch"/>
+        <result column="custManagerName" property="custManagerName"/>
+        <result column="custManagerTel" property="custManagerTel"/>
+        <result column="category" property="category"/>
+        <result column="manageBranch" property="manageBranch"/>
+        <result column="regisAddress" property="regisAddress"/>
+        <result column="regisMoney" property="regisMoney"/>
+        <result column="industryName" property="industryName"/>
+        <result column="businessScope" property="businessScope"/>
+        <result column="legalPersonName" property="legalPersonName"/>
+        <result column="contactPersonName" property="contactPersonName"/>
+        <result column="contactPersonTel" property="contactPersonTel"/>
+        <result column="isSupply" property="isSupply"/>
+    </resultMap>
 
 
+    <resultMap id="comToComMap" type="com.graphdatabase.model.entity.NodeAndRelationEntity">
+        <result column="nodeList" property="nodeList" javaType="java.lang.Object"/>
+        <result column="relationList" property="relationList" javaType="java.lang.Object"/>
+    </resultMap>
+
+    <select id="filterComToCom" resultMap="comToComMap" parameterType="com.graphdatabase.model.entity.FilterParameter">
+        match p=(a:Company) - [route:relation_cc*${searchLevel}] -> (b:Company)
+          with reduce(temp=0,r in route | r.timeRange) as timeRange,
+          reduce(temp=1,r in route | r.transNum) as transNum,
+          p as p,a as a,b as b
+        where 1=1
+        <if test='!transNum.equals(0)'>and transNum > #{transNum}</if>
+        <if test='isCircle.equals(1)'>and a.cname = b.cname</if>
+        <if test='isForward.equals(2)'>and b.cname = #{companyName} or a.cname = #{companyName}</if>
+        <if test='isForward.equals(1)'>and a.cname = #{companyName}</if>
+        <if test='isForward.equals(0)'>and b.cname = #{companyName}</if>
+        <if test='transCategory.equals(1)'>and b.category = #{transCategory}</if>
+        <if test='transCategory.equals(2)'>and b.category = #{transCategory}</if>
+        <if test='supplyNum.equals(1)'>and b.isSupply &lt;&gt;  #{supplyNum}</if>
+        and timeRange = #{timeRange}
+        return
+          NODES(p) as nodeList,RELATIONSHIPS(p) as relationList
+    </select>
+
+
+
+    <!--<resultMap id="comToComMap" type="com.graphdatabase.model.entity.ComToComEntity">-->
+        <!--<collection property="startCom" ofType="com.graphdatabase.model.node.CompanyNode">-->
+            <!--<id column="id1" property="Id"/>-->
+            <!--<result column="cname1" property="cname"/>-->
+            <!--<result column="openBranch1" property="openBranch"/>-->
+            <!--<result column="thirdBranch1" property="thirdBranch"/>-->
+            <!--<result column="secondBranch1" property="secondBranch"/>-->
+            <!--<result column="custManagerName1" property="custManagerName"/>-->
+            <!--<result column="custManagerTel1" property="custManagerTel"/>-->
+            <!--<result column="category1" property="category"/>-->
+            <!--<result column="manageBranch1" property="manageBranch"/>-->
+            <!--<result column="regisAddress1" property="regisAddress"/>-->
+            <!--<result column="regisMoney1" property="regisMoney"/>-->
+            <!--<result column="industryName1" property="industryName"/>-->
+            <!--<result column="businessScope1" property="businessScope"/>-->
+            <!--<result column="legalPersonName1" property="legalPersonName"/>-->
+            <!--<result column="contactPersonName1" property="contactPersonName"/>-->
+            <!--<result column="contactPersonTel1" property="contactPersonTel"/>-->
+            <!--<result column="isSupply1" property="isSupply"/>-->
+        <!--</collection>-->
+        <!--<collection property="endCom" ofType="com.graphdatabase.model.node.CompanyNode">-->
+            <!--<id column="id2" property="Id"/>-->
+            <!--<result column="cname2" property="cname"/>-->
+            <!--<result column="openBranch2" property="openBranch"/>-->
+            <!--<result column="thirdBranch2" property="thirdBranch"/>-->
+            <!--<result column="secondBranch2" property="secondBranch"/>-->
+            <!--<result column="custManagerName2" property="custManagerName"/>-->
+            <!--<result column="custManagerTel2" property="custManagerTel"/>-->
+            <!--<result column="category2" property="category"/>-->
+            <!--<result column="manageBranch2" property="manageBranch"/>-->
+            <!--<result column="regisAddress2" property="regisAddress"/>-->
+            <!--<result column="regisMoney2" property="regisMoney"/>-->
+            <!--<result column="industryName2" property="industryName"/>-->
+            <!--<result column="businessScope2" property="businessScope"/>-->
+            <!--<result column="legalPersonName2" property="legalPersonName"/>-->
+            <!--<result column="contactPersonName2" property="contactPersonName"/>-->
+            <!--<result column="contactPersonTel2" property="contactPersonTel"/>-->
+            <!--<result column="isSupply2" property="isSupply"/>-->
+        <!--</collection>-->
+        <!--<collection property="route_cc" ofType="java.util.Map">-->
+            <!--<result column="transMoney1" property="transMoney"/>-->
+            <!--<result column="transNum1" property="transNum"/>-->
+            <!--<result column="transAvg1" property="transAvg"/>-->
+            <!--<result column="transSum1" property="transSum"/>-->
+            <!--<result column="timeRange1" property="timeRange"/>-->
+        <!--</collection>-->
+    <!--</resultMap>-->
+
+    <!--<select id="filterComToCom" resultMap="comToComMap" parameterType="com.graphdatabase.model.entity.FilterParameter">-->
+        <!--match p=(a:Company) - [route:relation_cc*${searchLevel}] -> (b:Company)-->
+          <!--unwind route as r-->
+            <!--where 1=1 and r.timeRange = #{timeRange}-->
+            <!--<if test="isCircle=='1'">and a.cname = b.cname</if>-->
+            <!--<if test="isForward=='1'">and a.cname = #{companyName}</if>-->
+            <!--<if test="isForward=='0'">and b.cname = #{companyName}</if>-->
+            <!--<if test="transCategory=='1'">and b.category = #{transCategory}</if>-->
+            <!--<if test="transCategory=='2'">and b.category = #{transCategory}</if>-->
+            <!--<if test="supplyNum=='1'">and b.isSupply = #{supplyNum}</if>-->
+        <!--return-->
+            <!--a.id as id1, a.cname as cname1, a.openBranch as openBranch1, a.thirdBranch as thirdBranch1,-->
+            <!--a.secondBranch as secondBranch1, a.custManagerName as custManagerName1,-->
+            <!--a.custManagerTel as custManagerTel1, a.category as category1, a.manageBranch as manageBranch1,-->
+            <!--a.regisAddress as regisAddress1, a.regisMoney as regisMoney1, a.industryName as industryName1,-->
+            <!--a.businessScope as businessScope1, a.legalPersonName as legalPersonName1,-->
+            <!--a.contactPersonName as contactPersonName1, a.contactPersonTel as contactPersonTel1,-->
+            <!--a.isSupply as isSupply1,-->
+
+            <!--b.id as id2, b.cname as cname2, b.openBranch as openBranch2, b.thirdBranch as thirdBranch2,-->
+            <!--b.secondBranch as secondBranch2, b.custManagerName as custManagerName2,-->
+            <!--b.custManagerTel as custManagerTel2, b.category as category2, b.manageBranch as manageBranch2,-->
+            <!--b.regisAddress as regisAddress2, b.regisMoney as regisMoney2, b.industryName as industryName2,-->
+            <!--b.businessScope as businessScope2, b.legalPersonName as legalPersonName2,-->
+            <!--b.contactPersonName as contactPersonName2, b.contactPersonTel as contactPersonTel2,-->
+            <!--b.isSupply as isSupply2,-->
+
+            <!--r.transMoney as transMoney1, r.transNum as transNum1, r.transAvg as transAvg1,-->
+            <!--r.transSum as transSum1, r.timeRange as timeRange1-->
+    <!--</select>-->
 
 </mapper>

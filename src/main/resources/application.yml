@@ -7,8 +7,16 @@ spring:
     password: 123456
     url: jdbc:neo4j:http://localhost:7474
 
+logging:
+  level:
+    com:
+      graphdatabase:
+        mapper: INFO
+
 mybatis:
   mapper-locations: classpath*:**/*Mapper.xml
+
+
 
 
 #

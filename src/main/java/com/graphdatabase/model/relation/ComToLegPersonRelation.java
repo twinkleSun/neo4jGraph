@@ -31,4 +31,11 @@ public class ComToLegPersonRelation {
     //关系链终止节点
     @EndNode
     private LegalPersonNode endNode;
+
+    @Property(name = "startName")
+    private String startName;
+
+    @Property(name = "endName")
+    private String endName;
+
 }

@@ -1,4 +1,6 @@
 $(function () {
+
+
     /**
      * 是否成圈
      * 0=不成圈（默认）
@@ -13,7 +15,7 @@ $(function () {
      * 全不选也为双向
      * @type {number}
      */
-    var isForward = 0;
+    var isForward = 2;
 
     /**
      * 时间范围，默认为当月时间
@@ -23,10 +25,11 @@ $(function () {
 
     /**
      * 交易类别，默认为全部
-     * 全部，本行-本行，本行-他行
+     * 全部=3，本行-本行=1，本行-他行=2
      * @type {string}
      */
     var transCategory = "全部";
+    var transCategoryNum = 3;
 
     /**
      * 交易金额 transMoney，默认1000万
@@ -99,7 +102,7 @@ $(function () {
      * 探索方向，正向isForward
      */
     $("#isForward-btn").click(function() {
-        isForward = 1;
+        // isForward = 1;
         if($("#isForward-btn").hasClass("btn-info")){
             $("#isForward-btn").removeClass("btn-info");
             if($("#isBackward-btn").hasClass("btn-info")){
@@ -121,7 +124,7 @@ $(function () {
      * 探索方向，反向isBackward
      */
     $("#isBackward-btn").click(function() {
-        isCircle = 0;
+        // isCircle = 0;
         if($("#isBackward-btn").hasClass("btn-info")){
             $("#isBackward-btn").removeClass("btn-info");
             if($("#isForward-btn").hasClass("btn-info")){
@@ -152,13 +155,24 @@ $(function () {
      */
     $("#transCategory-select").change(function(){
         transCategory = $("#transCategory-select option:selected").text();
+        if(transCategory == "本行-本行"){
+            transCategoryNum = 1;
+        }else if(transCategory == "本行-他行"){
+            transCategoryNum = 2;
+        }else{
+            //全部
+            transCategoryNum = 3;
+        }
+
     });
 
     /**
      * 探索路径层数
      */
     $("#searchLevel-select").change(function(){
-        searchLevel = $("#searchLevel-select option:selected").text();
+        var searchLevelStr = $("#searchLevel-select option:selected").text();
+        searchLevel = parseInt(searchLevelStr.substring(0,searchLevelStr.length-1));
+        console.log(searchLevel);
     });
 
     /**
@@ -187,15 +201,330 @@ $(function () {
      * 提交查询按钮
      */
     $("#submit-btn").click(function() {
+        var filterParam;
+
         transMoney = $("#transMoney-input").val();
         transNum = $("#transNum-input").val();
+        if(transNum == ""){
+            transNum = 0;
+        }
         transAvg = $("#transAvg-input").val();
         companyName = $("#comName-input").val();
-        if(companyName == null || companyName == ""){
-            alert("请输入客户名称");
-        }else{
 
+        var searchLevelStr = $("#searchLevel-select option:selected").text();
+        searchLevel = parseInt(searchLevelStr.substring(0,searchLevelStr.length-1));
+
+        if(companyName == null || companyName == ""){
+            // alert("请输入客户名称");
+        }else{
+            filterParam ={
+                isCircle: isCircle,
+                isForward: isForward,
+                timeRange: timeRange,
+                transCategory: transCategoryNum,
+                transMoney: transMoney,
+                transNum: transNum,
+                transAvg: transAvg,
+                companyName: companyName,
+                searchLevel: searchLevel,
+                supplyNum: supplyNum,
+                onlyCom: onlyCom
+            };
         }
+
+
+        console.log(filterParam);
+
+        // var filterParam ={
+        //     isCircle: 0,
+        //     isForward: 2,
+        //     timeRange: "2019年11月",
+        //     transCategory: 3,
+        //     transMoney: transMoney,
+        //     transNum: transNum,
+        //     transAvg: transAvg,
+        //     companyName: "中国机床总公司",
+        //     searchLevel: 3,
+        //     supplyNum: 0,
+        //     onlyCom: 0
+        // };
+
+        $.ajax({
+            url: "/filter/cc",
+            type: "post",
+            traditional: true,
+            contentType: "application/json; charset=UTF-8",
+            dataType: "json",
+            data: JSON.stringify(filterParam),
+            success: function (data) {
+
+                /**
+                 * echarts中的关系
+                 * @type {any[]}
+                 */
+                var link_array= new Array;
+                /**
+                 * echarts中的节点
+                 * @type {any[]}
+                 */
+                var nodes_array= new Array;
+
+                /**
+                 * 用来剔除重复节点
+                 * @type {any[]}
+                 */
+                var nodesNameArray = new Array();
+
+                /**
+                 * 用来剔除重复关系
+                 * @type {any[]}
+                 */
+                var relationNameArray = new Array();
+
+
+                $("#main").html();
+
+                /**
+                 * 初始化echarts
+                 * @type {string[]}
+                 */
+                var colors=['#d48265', '#91c7ae','#749f83',  '#ca8622', '#bda29a','#6e7074', '#546570', '#c4ccd3'];
+
+                var myChart = echarts.init(document.getElementById('main'));
+                // myChart.showLoading();    //数据加载完之前先显示一段简单的loading动画
+                var categories = [];
+                categories[0]={
+                    name:"我行公司客户"
+                };
+                categories[1]={
+                    name: "他行公司客户"
+                };
+                categories[2]={
+                    name: "他行私人客户"
+                };
+
+                var option = {
+
+                    title: {
+                        text: '资金流转关系图',
+                        subtext: '资金流转链',
+                        top: 'top',
+                        left: 'left'
+                    },
+                    // 提示框的配置
+                    tooltip: {
+                        formatter: function (x) {
+                            return x.data.des;
+                        }
+                    },
+                    // 工具箱
+                    toolbox: {
+                        // 显示工具箱
+                        show: true,
+                        feature: {
+                            mark: {
+                                show: true
+                            },
+                            // 还原
+                            restore: {
+                                show: true
+                            },
+                            // 保存为图片
+                            saveAsImage: {
+                                show: true
+                            }
+                        }
+                    },
+                    legend: [{
+                        // selectedMode: 'single',
+                        data: categories.map(function (a) {
+                            return a.name;
+
+                        }),
+                    }],
+                    series: [{
+                        type: 'graph', // 类型:关系图
+                        layout: 'force', //图的布局，类型为力导图
+                        symbolSize: 40, // 调整节点的大小
+                        roam: true, // 是否开启鼠标缩放和平移漫游。默认不开启。如果只想要开启缩放或者平移,可以设置成 'scale' 或者 'move'。设置成 true 为都开启
+                        edgeSymbol: ['circle', 'arrow'],
+                        edgeSymbolSize: [2, 10],
+                        color:colors,
+                        focusNodeAdjacency: true,
+                        itemStyle: {
+                            normal: {
+                                borderColor: '#fff',
+                                borderWidth: 1,
+                                shadowBlur: 10,
+                                shadowColor: 'rgba(0, 0, 0, 0.3)'
+                            }
+                        },
+
+//            focusNodeAdjacency:true,
+
+                        edgeLabel: {
+                            normal: {
+                                textStyle: {
+                                    fontSize: 20
+                                }
+                            }
+                        },
+                        force: {
+                            repulsion: 2500,
+                            edgeLength: [10, 50]
+                        },
+                        draggable: true,
+                        lineStyle: {
+                            // normal: {
+                            //     width: 2,
+                            //     color: '#4b565b',
+                            // }
+                            color: 'source',
+                            curveness: 0.3
+                        },
+                        emphasis: {
+                            lineStyle: {
+                                width: 10
+                            }
+                        },
+                        edgeLabel: {
+                            normal: {
+                                show: true,
+                                formatter: function (x) {
+                                    return x.data.name;
+                                }
+                            }
+                        },
+                        label: {
+                            normal: {
+                                show: true,
+                                textStyle: {}
+                            }
+                        },
+
+                        // 数据
+                        data: nodes_array,
+                        links: link_array,
+                        categories: categories
+                    }]
+                };
+
+                myChart.on('click', {dataType: 'node'}, function (param) {
+                    console.log("-----node-----");
+                    console.log(param.data);
+                });
+
+                myChart.on('dblclick', {dataType: 'node'}, function (param) {
+                    console.log("-----dblclick-----");
+                    console.log(param.data);
+                });
+
+                myChart.on('click', {dataType: 'edge'}, function (param) {
+                    // 关系图的边被点击时此方法被回调。
+                    console.log("-----edge-----");
+                    console.log(param.data);
+                });
+
+                if(data == null || data.length ==0){
+
+                    alert("不存在符合条件的关系链路");
+                }else{
+
+                    var nodeLength = 0;
+                    var relationLength = 0;
+
+                    for(var i=0; i<data.length; i++){
+                        var nodeList = data[i].nodeList;
+                        var relationList = data[i].relationList;
+                        for(var n=0; n<nodeList.length; n++){
+                            if(nodesNameArray.indexOf(nodeList[n].cname)<0){
+                                nodes_array[nodeLength] = {
+                                    name: nodeList[n].cname,
+                                    des: nodeList[n].cname,
+                                    info:nodeList[n],
+                                    symbolSize: 70,
+                                    category: nodeList[n].category-1
+                                };
+                                nodesNameArray[nodeLength] = nodeList[n].cname;
+                                nodeLength++;
+
+                            }
+
+                        }
+
+                        for(var r=0; r<relationList.length; r++){
+                            var combineName = relationList[r].startName + relationList[r].endName;
+                            if(relationNameArray.indexOf(combineName) < 0){
+                                link_array[relationLength]={
+                                    source: relationList[r].startName,
+                                    target: relationList[r].endName,
+                                    info: relationList[r],
+                                    name: relationList[r].transMoney,
+                                    des: relationList[r].transMoney
+                                };
+
+                                relationNameArray[relationLength] = combineName;
+                                relationLength++;
+
+                            }
+
+                        }
+                    }
+
+
+                    myChart.setOption(option);
+                }
+
+
+
+
+            },
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                // console.log(XMLHttpRequest.status);
+                // console.log(XMLHttpRequest.readyState);
+                // console.log(textStatus);
+            },
+        });
+
+
+
+
+
     });
 
+
+
 });
+
+/**
+ * 校验笔均不得小于0
+ */
+function checkAvg(){
+    var checkAvg = $("#transAvg-input").val();
+    if(checkAvg <0 ){
+        alert("输入的数字不得小于0");
+        $("#transAvg-input").val("");
+    }
+};
+
+/**
+ * 校验笔数不得小于0
+ */
+function checkNum(){
+    var checkNum = $("#transNum-input").val();
+    if(checkNum <0 ){
+        alert("输入的数字不得小于0");
+        $("#transNum-input").val("");
+    }
+};
+
+/**
+ * 校验交易金额不得小于1000万
+ */
+function checkMoney(){
+    var checkMoney = $("#transMoney-input").val();
+    if(checkMoney <1000 ){
+        alert("输入的数字不得小于1000");
+        $("#transMoney-input").val(1000);
+    }
+};
