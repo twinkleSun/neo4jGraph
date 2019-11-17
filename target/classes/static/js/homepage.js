@@ -1,5 +1,17 @@
 $(function () {
 
+    var filterParam;
+
+    /**
+     * echarts中的关系
+     * @type {any[]}
+     */
+    var link_array= new Array;
+    /**
+     * echarts中的节点
+     * @type {any[]}
+     */
+    var nodes_array= new Array;
 
     /**
      * 是否成圈
@@ -197,11 +209,74 @@ $(function () {
         }
     });
 
+
+    /**
+     * 初始化echarts
+     * @type {string[]}
+     */
+    var colors=['#d48265', '#91c7ae','#749f83',  '#ca8622', '#bda29a','#6e7074', '#546570', '#c4ccd3'];
+
+    var myChart = echarts.init(document.getElementById('main'));
+    // myChart.showLoading();    //数据加载完之前先显示一段简单的loading动画
+    var categories = [];
+    categories[0]={
+        name:"我行公司客户"
+    };
+    categories[1]={
+        name: "他行公司客户"
+    };
+    categories[2]={
+        name: "他行私人客户"
+    };
+
+    
+    myChart.on('click', {dataType: 'node'}, function (param) {
+        console.log("-----node-----");
+        console.log(param.data);
+    });
+
+    myChart.on('dblclick', {dataType: 'node'}, function (param) {
+        console.log("-----dblclick-----");
+        console.log(param.data);
+
+        transMoney = $("#transMoney-input").val();
+        transNum = $("#transNum-input").val();
+        if(transNum == ""){
+            transNum = 0;
+        }
+        transAvg = $("#transAvg-input").val();
+
+        var searchLevelStr = $("#searchLevel-select option:selected").text();
+        searchLevel = parseInt(searchLevelStr.substring(0,searchLevelStr.length-1));
+
+        filterParam ={
+            isCircle: isCircle,
+            isForward: isForward,
+            timeRange: timeRange,
+            transCategory: transCategoryNum,
+            transMoney: transMoney,
+            transNum: transNum,
+            transAvg: transAvg,
+            companyName: param.data.name,
+            searchLevel: searchLevel,
+            supplyNum: supplyNum,
+            onlyCom: onlyCom
+        };
+
+        console.log(filterParam);
+        ajaxPainting(filterParam);
+    });
+
+    myChart.on('click', {dataType: 'edge'}, function (param) {
+        console.log("-----edge-----");
+        console.log(param.data);
+    });
+
+
     /**
      * 提交查询按钮
      */
     $("#submit-btn").click(function() {
-        var filterParam;
 
         transMoney = $("#transMoney-input").val();
         transNum = $("#transNum-input").val();
@@ -213,6 +288,7 @@ $(function () {
 
         var searchLevelStr = $("#searchLevel-select option:selected").text();
         searchLevel = parseInt(searchLevelStr.substring(0,searchLevelStr.length-1));
+
 
         if(companyName == null || companyName == ""){
             // alert("请输入客户名称");
@@ -230,8 +306,7 @@ $(function () {
                 supplyNum: supplyNum,
                 onlyCom: onlyCom
             };
-        }
-
+        };
 
         console.log(filterParam);
 
@@ -249,6 +324,10 @@ $(function () {
         //     onlyCom: 0
         // };
 
+        ajaxPainting(filterParam);
+    });
+
+    function ajaxPainting(filterParam) {
         $.ajax({
             url: "/filter/cc",
             type: "post",
@@ -282,148 +361,8 @@ $(function () {
                 var relationNameArray = new Array();
 
 
-                $("#main").html();
+                //$("#main").html();
 
-                /**
-                 * 初始化echarts
-                 * @type {string[]}
-                 */
-                var colors=['#d48265', '#91c7ae','#749f83',  '#ca8622', '#bda29a','#6e7074', '#546570', '#c4ccd3'];
-
-                var myChart = echarts.init(document.getElementById('main'));
-                // myChart.showLoading();    //数据加载完之前先显示一段简单的loading动画
-                var categories = [];
-                categories[0]={
-                    name:"我行公司客户"
-                };
-                categories[1]={
-                    name: "他行公司客户"
-                };
-                categories[2]={
-                    name: "他行私人客户"
-                };
-
-                var option = {
-
-                    title: {
-                        text: '资金流转关系图',
-                        subtext: '资金流转链',
-                        top: 'top',
-                        left: 'left'
-                    },
-                    // 提示框的配置
-                    tooltip: {
-                        formatter: function (x) {
-                            return x.data.des;
-                        }
-                    },
-                    // 工具箱
-                    toolbox: {
-                        // 显示工具箱
-                        show: true,
-                        feature: {
-                            mark: {
-                                show: true
-                            },
-                            // 还原
-                            restore: {
-                                show: true
-                            },
-                            // 保存为图片
-                            saveAsImage: {
-                                show: true
-                            }
-                        }
-                    },
-                    legend: [{
-                        // selectedMode: 'single',
-                        data: categories.map(function (a) {
-                            return a.name;
-
-                        }),
-                    }],
-                    series: [{
-                        type: 'graph', // 类型:关系图
-                        layout: 'force', //图的布局，类型为力导图
-                        symbolSize: 40, // 调整节点的大小
-                        roam: true, // 是否开启鼠标缩放和平移漫游。默认不开启。如果只想要开启缩放或者平移,可以设置成 'scale' 或者 'move'。设置成 true 为都开启
-                        edgeSymbol: ['circle', 'arrow'],
-                        edgeSymbolSize: [2, 10],
-                        color:colors,
-                        focusNodeAdjacency: true,
-                        itemStyle: {
-                            normal: {
-                                borderColor: '#fff',
-                                borderWidth: 1,
-                                shadowBlur: 10,
-                                shadowColor: 'rgba(0, 0, 0, 0.3)'
-                            }
-                        },
-
-//            focusNodeAdjacency:true,
-
-                        edgeLabel: {
-                            normal: {
-                                textStyle: {
-                                    fontSize: 20
-                                }
-                            }
-                        },
-                        force: {
-                            repulsion: 2500,
-                            edgeLength: [10, 50]
-                        },
-                        draggable: true,
-                        lineStyle: {
-                            // normal: {
-                            //     width: 2,
-                            //     color: '#4b565b',
-                            // }
-                            color: 'source',
-                            curveness: 0.3
-                        },
-                        emphasis: {
-                            lineStyle: {
-                                width: 10
-                            }
-                        },
-                        edgeLabel: {
-                            normal: {
-                                show: true,
-                                formatter: function (x) {
-                                    return x.data.name;
-                                }
-                            }
-                        },
-                        label: {
-                            normal: {
-                                show: true,
-                                textStyle: {}
-                            }
-                        },
-
-                        // 数据
-                        data: nodes_array,
-                        links: link_array,
-                        categories: categories
-                    }]
-                };
-
-                myChart.on('click', {dataType: 'node'}, function (param) {
-                    console.log("-----node-----");
-                    console.log(param.data);
-                });
-
-                myChart.on('dblclick', {dataType: 'node'}, function (param) {
-                    console.log("-----dblclick-----");
-                    console.log(param.data);
-                });
-
-                myChart.on('click', {dataType: 'edge'}, function (param) {
-                    // 关系图的边被点击时此方法被回调。
-                    console.log("-----edge-----");
-                    console.log(param.data);
-                });
 
                 if(data == null || data.length ==0){
 
@@ -470,7 +409,111 @@ $(function () {
 
                         }
                     }
+                    var option = {
 
+                        title: {
+                            text: '资金流转关系图',
+                            subtext: '资金流转链',
+                            top: 'top',
+                            left: 'left'
+                        },
+                        // 提示框的配置
+                        tooltip: {
+                            formatter: function (x) {
+                                return x.data.des;
+                            }
+                        },
+                        // 工具箱
+                        toolbox: {
+                            // 显示工具箱
+                            show: true,
+                            feature: {
+                                mark: {
+                                    show: true
+                                },
+                                // 还原
+                                restore: {
+                                    show: true
+                                },
+                                // 保存为图片
+                                saveAsImage: {
+                                    show: true
+                                }
+                            }
+                        },
+                        legend: [{
+                            // selectedMode: 'single',
+                            data: categories.map(function (a) {
+                                return a.name;
+
+                            }),
+                        }],
+                        series: [{
+                            type: 'graph', // 类型:关系图
+                            layout: 'force', //图的布局，类型为力导图
+                            symbolSize: 40, // 调整节点的大小
+                            roam: true, // 是否开启鼠标缩放和平移漫游。默认不开启。如果只想要开启缩放或者平移,可以设置成 'scale' 或者 'move'。设置成 true 为都开启
+                            edgeSymbol: ['circle', 'arrow'],
+                            edgeSymbolSize: [2, 10],
+                            color:colors,
+                            focusNodeAdjacency: true,
+                            itemStyle: {
+                                normal: {
+                                    borderColor: '#fff',
+                                    borderWidth: 1,
+                                    shadowBlur: 10,
+                                    shadowColor: 'rgba(0, 0, 0, 0.3)'
+                                }
+                            },
+
+//            focusNodeAdjacency:true,
+
+                            edgeLabel: {
+                                normal: {
+                                    textStyle: {
+                                        fontSize: 20
+                                    }
+                                }
+                            },
+                            force: {
+                                repulsion: 2500,
+                                edgeLength: [10, 50]
+                            },
+                            draggable: true,
+                            lineStyle: {
+                                // normal: {
+                                //     width: 2,
+                                //     color: '#4b565b',
+                                // }
+                                color: 'source',
+                                curveness: 0.3
+                            },
+                            emphasis: {
+                                lineStyle: {
+                                    width: 10
+                                }
+                            },
+                            edgeLabel: {
+                                normal: {
+                                    show: true,
+                                    formatter: function (x) {
+                                        return x.data.name;
+                                    }
+                                }
+                            },
+                            label: {
+                                normal: {
+                                    show: true,
+                                    textStyle: {}
+                                }
+                            },
+
+                            // 数据
+                            data: nodes_array,
+                            links: link_array,
+                            categories: categories
+                        }]
+                    };
 
                     myChart.setOption(option);
                 }
@@ -485,14 +528,7 @@ $(function () {
                 // console.log(textStatus);
             },
         });
-
-
-
-
-
-    });
-
-
+    }
 
 });
 
@@ -528,3 +564,4 @@ function checkMoney(){
         $("#transMoney-input").val(1000);
     }
 };
+
